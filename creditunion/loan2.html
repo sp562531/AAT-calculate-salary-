@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>คำนวณดอกเบี้ยสหกรณ์</title>
+<link rel="icon" href="../images/calculator_icon.png" type="image/png">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap');
+
+:root{
+  --green-deep:#1b5e20;
+  --green-mid:#2e7d32;
+  --green-light:#4caf50;
+  --green-pale:#e8f5e9;
+  --green-tint:#f1f8f2;
+  --gold:#f9a825;
+  --gold-light:#fff8e1;
+  --text:#1a2a1c;
+  --text-muted:#6a7c6e;
+  --border:#c8e6c9;
+  --white:#fff;
+  --shadow:0 4px 20px rgba(27,94,32,.08);
+}
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  font-family:'Sarabun',sans-serif;
+  background:var(--green-tint);
+  color:var(--text);
+  min-height:100vh;
+  padding:16px;
+}
+
+.container{
+  max-width:500px;
+  margin:auto;
+  background:var(--white);
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:var(--shadow);
+}
+
+/* HEADER */
+.header{
+  background:var(--green-deep);
+  color:white;
+  text-align:center;
+  padding:24px 20px 20px;
+}
+
+.header-badge{
+  display:inline-block;
+  background:var(--gold);
+  color:var(--green-deep);
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:1.5px;
+  padding:3px 10px;
+  border-radius:20px;
+  margin-bottom:8px;
+}
+
+.header h1{
+  font-size:20px;
+  font-weight:700;
+}
+
+/* SECTION */
+.section{
+  padding:18px 18px 12px;
+  border-bottom:1px solid var(--border);
+}
+
+.section-title,
+.result-title{
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:1.2px;
+  text-transform:uppercase;
+  color:var(--green-mid);
+  margin-bottom:12px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.section-title::after,
+.result-title::after{
+  content:'';
+  flex:1;
+  height:1px;
+  background:var(--border);
+}
+
+.rate-row{
+  display:grid;
+  grid-template-columns:130px 1fr;
+  gap:6px;
+  align-items:center;
+  margin-bottom:12px;
+}
+
+.field-label{
+  font-size:13px;
+}
+
+input[type="text"],
+select{
+  width:100%;
+  padding:8px 10px;
+  font-size:13px;
+  border:1.5px solid var(--border);
+  border-radius:8px;
+  font-family:'IBM Plex Mono',monospace;
+  transition:.2s;
+  background-color: var(--white);
+}
+
+select {
+  font-family: 'Sarabun', sans-serif;
+}
+
+input:focus,
+select:focus{
+  outline:none;
+  border-color:var(--green-light);
+  box-shadow:0 0 0 3px rgba(76,175,80,.12);
+}
+
+.input-hint {
+  grid-column: 2 / 3;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  line-height: 1.4;
+}
+
+/* BUTTON */
+.btn-row{
+  display:flex;
+  gap:10px;
+  padding:14px 18px;
+}
+
+.btn{
+  flex:1;
+  border:none;
+  border-radius:10px;
+  padding:12px;
+  font-size:14px;
+  font-weight:700;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.btn:active{
+  transform:scale(.98);
+}
+
+.btn-primary{
+  background:var(--green-mid);
+  color:white;
+}
+
+.btn-primary:hover{
+  background:var(--green-deep);
+}
+
+.btn-secondary{
+  background:#f0f0f0;
+  color:#666;
+}
+
+/* RESULT VIEW */
+.result-section{
+  padding:6px 18px 18px;
+  animation:fadeUp .35s ease;
+}
+
+@keyframes fadeUp{
+  from{
+    opacity:0;
+    transform:translateY(10px);
+  }
+  to{
+    opacity:1;
+    transform:none;
+  }
+}
+
+.result-card {
+  background: var(--gold-light);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.result-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  font-size: 14px;
+}
+
+.result-item:not(:last-child) {
+  border-bottom: 1px dashed var(--border);
+}
+
+.result-item .val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 700;
+  color: var(--green-deep);
+}
+
+.result-item.grand .val {
+  color: var(--gold);
+  font-size: 16px;
+}
+
+/* PRODUCT CARD (SHOPEE) */
+.product-wrap {
+  padding: 0 18px 16px;
+}
+
+.product-card {
+  display: block;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  text-decoration: none;
+  color: var(--text);
+  background: var(--white);
+  transition: 0.2s;
+}
+
+.product-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+.product-card img {
+  width: 100%;
+  display: block;
+}
+
+.product-info {
+  padding: 12px;
+}
+
+.title {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.desc {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.product-btn {
+  background: #ff5722;
+  color: #fff;
+  text-align: center;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <div class="header-badge">LOAN CALCULATOR</div>
+    <h1>คำนวณดอกเบี้ยเงินกู้</h1>
+  </div>
+
+  <!-- SETTING inputs -->
+  <div class="section">
+    <div class="section-title">รายละเอียดการคำนวณ</div>
+
+    <div class="rate-row">
+      <div class="field-label">เงินต้นคงเหลือ</div>
+      <input type="text" id="principal" placeholder="บาท" oninput="formatInput(this)">
+    </div>
+
+    <div class="rate-row">
+      <div class="field-label">ดอกเบี้ย (% ต่อปี)</div>
+      <input type="text" id="rate" placeholder="เช่น 6.5" oninput="formatInput(this)">
+    </div>
+
+    <div class="rate-row">
+      <div class="field-label">ค่างวด</div>
+      <input type="text" id="installment" placeholder="บาท" oninput="formatInput(this)">
+    </div>
+
+    <div class="rate-row">
+      <div class="field-label">งวดเดือน</div>
+      <select id="monthSelect">
+        <option value="">-- เลือกเดือน --</option>
+        <option value="1">มกราคม</option>
+        <option value="2">กุมภาพันธ์</option>
+        <option value="3">มีนาคม</option>
+        <option value="4">เมษายน</option>
+        <option value="5">พฤษภาคม</option>
+        <option value="6">มิถุนายน</option>
+        <option value="7">กรกฎาคม</option>
+        <option value="8">สิงหาคม</option>
+        <option value="9">กันยายน</option>
+        <option value="10">ตุลาคม</option>
+        <option value="11">พฤศจิกายน</option>
+        <option value="12">ธันวาคม</option>
+      </select>
+      <div class="input-hint">
+        จำนวนวันจะถูกนับตามเดือนที่เลือก (อิงตามปีปัจจุบัน)
+      </div>
+    </div>
+  </div>
+
+  <!-- BUTTONS -->
+  <div class="btn-row">
+    <button class="btn btn-secondary" onclick="clearData()">ล้างข้อมูล</button>
+    <button class="btn btn-primary" onclick="calculate()">คำนวณดอกเบี้ย</button>
+  </div>
+
+  <!-- RESULT -->
+  <div class="result-section" id="resultSection" style="display:none;">
+    <div class="result-title">ผลการคำนวณ</div>
+    <div class="result-card">
+      <div class="result-item">
+        <div>ดอกเบี้ยที่ต้องจ่าย</div>
+        <div class="val" id="interestResult">0.00</div>
+      </div>
+      <div class="result-item grand">
+        <div><b>ยอดรวมที่ต้องชำระ</b></div>
+        <div class="val" id="totalResult">0.00</div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- PRODUCT AFFILIATE -->
+  <div class="product-wrap" id="randomProduct"></div>
+  
+</div>
+  
+<script>
+function format(n){
+  return Number(n).toLocaleString("th-TH",{
+    minimumFractionDigits:2,
+    maximumFractionDigits:2
+  });
+}
+
+/* FORMAT INPUT WHILE TYPING (รองรับทศนิยมและคอมมา) */
+function formatInput(el){
+  let val = el.value.replace(/,/g, '');
+  
+  if (val === '' || val === '.') return;
+  if (isNaN(val)) {
+    el.value = el.value.replace(/[^\d.]/g, '');
+    return;
+  }
+
+  let parts = val.split('.');
+  parts[0] = Number(parts[0]).toLocaleString('th-TH');
+  
+  if (parts[1] !== undefined) {
+    parts[1] = parts[1].substring(0, 2);
+  }
+
+  el.value = parts.join('.');
+}
+
+// ฟังก์ชันหาจำนวนวันของเดือนที่เลือก โดยอิงปีปัจจุบัน
+function getDaysInMonth(month) {
+  if (!month) return 0;
+  const year = new Date().getFullYear();
+  return new Date(year, month, 0).getDate();
+}
+
+function calculate(){
+  let principal = parseFloat(document.getElementById("principal").value.replace(/,/g, '')) || 0;
+  let rate = parseFloat(document.getElementById("rate").value.replace(/,/g, '')) || 0;
+  let monthValue = parseInt(document.getElementById("monthSelect").value) || 0;
+  let installment = parseFloat(document.getElementById("installment").value.replace(/,/g, '')) || 0;
+
+  if (!monthValue) {
+    alert("กรุณาเลือกเดือนที่ต้องการคำนวณ");
+    return;
+  }
+
+  let days = getDaysInMonth(monthValue);
+
+  // สูตรคำนวณดอกเบี้ยเงินกู้
+  let totalInterest = principal * rate / 100;
+  let perDay = totalInterest / 365;
+  let interest = perDay * days;
+
+  // ปัด 2 ตำแหน่ง
+  interest = Number(interest.toFixed(2));
+  let total = installment + interest;
+
+  document.getElementById("interestResult").innerText = format(interest);
+  document.getElementById("totalResult").innerText = format(total);
+  
+  // แสดงผลลัพธ์แบบแอนิเมชัน smooth
+  document.getElementById("resultSection").style.display = "block";
+  document.getElementById("resultSection").scrollIntoView({
+    behavior: "smooth",
+    block: "nearest"
+  });
+}
+
+function clearData(){
+  document.getElementById("principal").value = "";
+  document.getElementById("rate").value = "";
+  document.getElementById("installment").value = "";
+  document.getElementById("monthSelect").value = "";
+  document.getElementById("interestResult").innerText = "0.00";
+  document.getElementById("totalResult").innerText = "0.00";
+  document.getElementById("resultSection").style.display = "none";
+}
+  
+function renderRandomProduct() {
+  if (typeof getRandomProduct === 'function') {
+    const p = getRandomProduct();
+    document.getElementById("randomProduct").innerHTML = `
+      <a href="${p.url}" target="_blank" class="product-card">
+        <img src="${p.img}">
+        <div class="product-info">
+          <div class="title">${p.title}</div>
+          <div class="desc">คลิกเพื่อดูรายละเอียด</div>
+          <div class="product-btn">🛒 ดูสินค้า</div>
+        </div>
+      </a>
+    `;
+  }
+}
+
+// ผูกปุ่ม Enter ให้ทำงานคำนวณด้วย
+document.addEventListener("keydown", function(e){
+  if(e.key === "Enter"){
+    calculate();
+  }
+});
+
+window.onload = renderRandomProduct;
+</script>
+<script src="../affiliate.js"></script>
+  
+</body>
+</html>

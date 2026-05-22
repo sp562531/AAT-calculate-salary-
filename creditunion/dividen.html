@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>คำนวณปันผลสหกรณ์</title>
+
+<link rel="icon" href="../images/calculator_icon.png" type="image/png">
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap');
+
+:root{
+  --green-deep:#1b5e20;
+  --green-mid:#2e7d32;
+  --green-light:#4caf50;
+  --green-pale:#e8f5e9;
+  --green-tint:#f1f8f2;
+  --gold:#f9a825;
+  --gold-light:#fff8e1;
+  --text:#1a2a1c;
+  --text-muted:#6a7c6e;
+  --border:#c8e6c9;
+  --white:#fff;
+  --shadow:0 4px 20px rgba(27,94,32,.08);
+}
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  font-family:'Sarabun',sans-serif;
+  background:var(--green-tint);
+  color:var(--text);
+  min-height:100vh;
+  padding:16px;
+}
+
+.container{
+  max-width:500px;
+  margin:auto;
+  background:var(--white);
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:var(--shadow);
+}
+
+/* HEADER */
+
+.header{
+  background:var(--green-deep);
+  color:white;
+  text-align:center;
+  padding:24px 20px 20px;
+}
+
+.header-badge{
+  display:inline-block;
+  background:var(--gold);
+  color:var(--green-deep);
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:1.5px;
+  padding:3px 10px;
+  border-radius:20px;
+  margin-bottom:8px;
+}
+
+.header h1{
+  font-size:20px;
+  font-weight:700;
+}
+
+/* SECTION */
+
+.section{
+  padding:18px 18px 12px;
+  border-bottom:1px solid var(--border);
+}
+
+.section-title,
+.result-title{
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:1.2px;
+  text-transform:uppercase;
+  color:var(--green-mid);
+  margin-bottom:12px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.section-title::after,
+.result-title::after{
+  content:'';
+  flex:1;
+  height:1px;
+  background:var(--border);
+}
+
+.rate-row{
+  display:grid;
+  grid-template-columns:150px 1fr;
+  gap:6px;
+  align-items:center;
+  margin-bottom:10px;
+}
+
+.field-label{
+  font-size:13px;
+}
+
+input[type="text"],
+input[type="number"]{
+  width:100%;
+  padding:8px 10px;
+  font-size:13px;
+  border:1.5px solid var(--border);
+  border-radius:8px;
+  font-family:'IBM Plex Mono',monospace;
+  transition:.2s;
+}
+
+input:focus{
+  outline:none;
+  border-color:var(--green-light);
+  box-shadow:0 0 0 3px rgba(76,175,80,.12);
+}
+
+/* TOGGLE */
+
+.toggle-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:12px;
+  padding:8px 12px;
+  background:var(--green-tint);
+  border-radius:10px;
+  border:1px solid var(--border);
+}
+
+.toggle-label{
+  flex:1;
+  font-size:13px;
+}
+
+.switch{
+  position:relative;
+  width:46px;
+  height:24px;
+}
+
+.switch input{
+  opacity:0;
+  width:0;
+  height:0;
+}
+
+.slider{
+  position:absolute;
+  inset:0;
+  background:#ccc;
+  border-radius:24px;
+  transition:.3s;
+  cursor:pointer;
+}
+
+.slider:before{
+  content:'';
+  position:absolute;
+  width:18px;
+  height:18px;
+  left:3px;
+  top:3px;
+  background:white;
+  border-radius:50%;
+  transition:.3s;
+}
+
+.switch input:checked + .slider{
+  background:var(--green-light);
+}
+
+.switch input:checked + .slider:before{
+  transform:translateX(22px);
+}
+
+/* MONTHS */
+
+.months-grid{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.month-row{
+  display:grid;
+  grid-template-columns:120px 1fr;
+  gap:12px;
+  align-items:center;
+}
+
+.month-tag{
+  font-size:13px;
+  font-weight:600;
+  color:var(--text-muted);
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.month-dot{
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:var(--green-light);
+}
+
+/* BUTTON */
+
+.btn-row{
+  display:flex;
+  gap:10px;
+  padding:14px 18px;
+}
+
+.btn{
+  flex:1;
+  border:none;
+  border-radius:10px;
+  padding:12px;
+  font-size:14px;
+  font-weight:700;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.btn:active{
+  transform:scale(.98);
+}
+
+.btn-primary{
+  background:var(--green-mid);
+  color:white;
+}
+
+.btn-primary:hover{
+  background:var(--green-deep);
+}
+
+.btn-secondary{
+  background:#f0f0f0;
+  color:#666;
+}
+
+/* RESULT */
+
+.result-section{
+  padding:0 18px 18px;
+  animation:fadeUp .35s ease;
+}
+
+@keyframes fadeUp{
+  from{
+    opacity:0;
+    transform:translateY(10px);
+  }
+  to{
+    opacity:1;
+    transform:none;
+  }
+}
+
+.result-table-wrap{
+  border-radius:10px;
+  overflow:hidden;
+  border:1.5px solid var(--border);
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:13px;
+}
+
+thead th{
+  background:var(--green-deep);
+  color:white;
+  padding:10px 12px;
+  font-size:11px;
+  text-align:center;
+}
+
+tbody td{
+  padding:9px 12px;
+  border-bottom:1px solid #eee;
+  text-align:center;
+  font-size:12px;
+}
+
+tbody td:nth-child(2),
+tbody td:nth-child(3){
+  text-align:right;
+  font-family:'IBM Plex Mono',monospace;
+}
+
+tbody tr:nth-child(even){
+  background:var(--green-tint);
+}
+
+tbody tr:hover{
+  background:var(--green-pale);
+}
+
+/* CARRY */
+
+.carry-row td{
+  background:#e3f2fd !important;
+  color:#1565c0 !important;
+  font-weight:600;
+}
+
+/* SUMMARY */
+
+.summary-row td{
+  background:var(--gold-light) !important;
+  font-weight:700;
+  color:var(--green-deep);
+}
+
+.summary-row td:last-child{
+  color:var(--gold);
+  font-size:14px;
+}
+
+.disclaimer{
+  text-align:center;
+  font-size:10px;
+  color:var(--text-muted);
+  padding:10px 18px 16px;
+  line-height:1.6;
+}
+
+.note{
+  font-size:11px;
+  color:#777;
+  margin-top:3px;
+  line-height:1.4;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <div class="header-badge">DIVIDEND CALCULATOR</div>
+    <h1>คำนวณปันผล</h1>
+  </div>
+
+  <!-- SETTING -->
+  <div class="section">
+
+    <div class="section-title">รายละเอียดการคำนวณ</div>
+
+    <div class="rate-row">
+      <div class="field-label">อัตราปันผล (%/ปี)</div>
+      <input type="text" id="rate" placeholder="เช่น 6.5">
+    </div>
+
+    <div class="rate-row">
+      <div class="field-label">ยอดยกมา</div>
+      <input type="text" id="carryOver"
+      placeholder="บาท"
+      oninput="formatInput(this)">
+    </div>
+
+  </div>
+
+  <!-- MONTH -->
+  <div class="section">
+
+    <div class="section-title">ยอดฝากรายเดือน</div>
+
+<div class="toggle-row">
+
+  <div style="flex:1;">
+
+    <div class="toggle-label">
+      ฝากเท่ากันทุกเดือน
+    </div>
+
+    <div class="note">
+      กรอกเฉพาะเดือนมกราคม ระบบจะคัดลอกให้อัตโนมัติ
+    </div>
+
+  </div>
+
+  <label class="switch">
+    <input type="checkbox"
+    id="sameAmountToggle"
+    onchange="onToggleSame()">
+
+    <span class="slider"></span>
+  </label>
+
+</div>
+
+    <div class="months-grid" id="monthsGrid"></div>
+
+  </div>
+
+  <!-- BUTTON -->
+  <div class="btn-row">
+
+    <button class="btn btn-secondary"
+    onclick="clearAll()">
+      ล้างข้อมูล
+    </button>
+
+    <button class="btn btn-primary"
+    onclick="calculate()">
+      คำนวณปันผล
+    </button>
+
+  </div>
+
+  <!-- RESULT -->
+  <div class="result-section"
+  id="resultSection"
+  style="display:none">
+
+    <div class="result-title">ผลการคำนวณ</div>
+
+    <div class="result-table-wrap">
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>เดือน</th>
+            <th style="text-align:right">ยอดเงินฝาก</th>
+            <th style="text-align:right">ปันผล</th>
+          </tr>
+        </thead>
+
+        <tbody id="resultBody"></tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+  <div class="disclaimer"
+  id="disclaimer"
+  style="display:none">
+
+  * ปันผลรายเดือน = เงินฝาก × อัตรา% ÷ 100 ÷ 12 × ตัวคูณเดือน (ม.ค.=11 … ธ.ค.=0)<br>
+  ยอดยกมาคำนวณเต็มปี = ยอดยกมา × อัตรา% ÷ 100
+
+  </div>
+
+</div>
+
+<script>
+
+const MONTHS_TH = [
+"มกราคม","กุมภาพันธ์","มีนาคม","เมษายน",
+"พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม",
+"กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"
+];
+
+const MONTH_MULTIPLIER = [11,10,9,8,7,6,5,4,3,2,1,0];
+
+/* FORMAT NUMBER */
+
+function fmt(n){
+  return Number(n).toLocaleString(
+    "th-TH",
+    {
+      minimumFractionDigits:2,
+      maximumFractionDigits:2
+    }
+  );
+}
+
+/* FORMAT INPUT */
+
+function formatInput(el){
+
+  let value = el.value.replace(/,/g,'');
+
+  if(value === ''){
+    el.value = '';
+    return;
+  }
+
+  if(isNaN(value)) return;
+
+  el.value = Number(value).toLocaleString('th-TH');
+
+  saveData();
+}
+
+/* CREATE MONTH INPUT */
+
+const grid = document.getElementById("monthsGrid");
+
+MONTHS_TH.forEach((m,i)=>{
+
+  const row = document.createElement("div");
+
+  row.className = "month-row";
+
+  row.innerHTML = `
+    <div class="month-tag">
+      <span class="month-dot"></span>
+      ${m}
+    </div>
+
+    <input
+      type="text"
+      id="dep${i}"
+      placeholder="0"
+      oninput="formatInput(this); onDepInput(${i})"
+    >
+  `;
+
+  grid.appendChild(row);
+
+});
+
+/* CALC */
+
+function calcMonthDiv(dep, rate, i){
+  return dep * (rate/100) / 12 * MONTH_MULTIPLIER[i];
+}
+
+/* SAME AMOUNT */
+
+function onDepInput(idx){
+
+  const toggle =
+  document.getElementById("sameAmountToggle").checked;
+
+  if(toggle && idx === 0){
+
+    const val =
+    document.getElementById("dep0").value;
+
+    for(let j=1; j<12; j++){
+
+      document.getElementById("dep"+j).value = val;
+
+    }
+
+  }
+
+  saveData();
+}
+
+function onToggleSame(){
+
+  const on =
+  document.getElementById("sameAmountToggle").checked;
+
+  if(on){
+
+    const val =
+    document.getElementById("dep0").value;
+
+    for(let j=1; j<12; j++){
+
+      document.getElementById("dep"+j).value = val;
+
+      document.getElementById("dep"+j).readOnly = true;
+
+      document.getElementById("dep"+j).style.background =
+      "#f5f5f5";
+
+      document.getElementById("dep"+j).style.color =
+      "#999";
+    }
+
+  }else{
+
+    for(let j=1; j<12; j++){
+
+      document.getElementById("dep"+j).readOnly = false;
+
+      document.getElementById("dep"+j).style.background = "";
+
+      document.getElementById("dep"+j).style.color = "";
+
+    }
+
+  }
+
+  saveData();
+}
+
+/* CALCULATE */
+
+function calculate(){
+
+  const rate =
+  parseFloat(
+    document.getElementById("rate").value.replace(/,/g,'')
+  ) || 0;
+
+  const carry =
+  parseFloat(
+    document.getElementById("carryOver").value.replace(/,/g,'')
+  ) || 0;
+
+  if(rate <= 0){
+
+    alert("กรุณากรอกอัตราปันผล");
+
+    return;
+  }
+
+  const carryDiv = carry * (rate/100);
+
+  let tbody = "";
+
+  let totalMonthDiv = 0;
+
+  let totalMonthDep = 0;
+
+  /* CARRY */
+
+  if(carry > 0){
+
+    tbody += `
+    <tr class="carry-row">
+      <td>ยอดที่ยกมา</td>
+      <td>${fmt(carry)}</td>
+      <td>${fmt(carryDiv)}</td>
+    </tr>
+    `;
+  }
+
+  /* MONTH */
+
+  MONTHS_TH.forEach((m,i)=>{
+
+    const dep =
+    parseFloat(
+      document.getElementById("dep"+i)
+      .value.replace(/,/g,'')
+    ) || 0;
+
+    const div =
+    calcMonthDiv(dep, rate, i);
+
+    totalMonthDiv += div;
+
+    totalMonthDep += dep;
+
+    tbody += `
+    <tr>
+      <td>${m}</td>
+      <td>${dep > 0 ? fmt(dep) : "—"}</td>
+      <td>${dep > 0 ? fmt(div) : "—"}</td>
+    </tr>
+    `;
+  });
+
+  /* MONTH SUMMARY */
+
+  tbody += `
+  <tr>
+    <td><b>รวมฝากรายเดือน</b></td>
+    <td><b>${fmt(totalMonthDep)}</b></td>
+    <td><b>${fmt(totalMonthDiv)}</b></td>
+  </tr>
+  `;
+
+  /* GRAND */
+
+  const grandDep =
+  totalMonthDep + carry;
+
+  const grandDiv =
+  totalMonthDiv + carryDiv;
+
+  tbody += `
+  <tr class="summary-row">
+    <td>รวมทั้งหมด</td>
+    <td>${fmt(grandDep)}</td>
+    <td>${fmt(grandDiv)}</td>
+  </tr>
+  `;
+
+  document.getElementById("resultBody").innerHTML =
+  tbody;
+
+  document.getElementById("resultSection").style.display =
+  "block";
+
+  document.getElementById("disclaimer").style.display =
+  "block";
+
+  document.getElementById("resultSection")
+  .scrollIntoView({
+    behavior:"smooth",
+    block:"nearest"
+  });
+
+  saveData();
+}
+
+/* CLEAR */
+
+function clearAll(){
+
+  localStorage.removeItem("coopDividendData");
+
+  document.getElementById("rate").value = "";
+
+  document.getElementById("carryOver").value = "";
+
+  document.getElementById("sameAmountToggle").checked =
+  false;
+
+  for(let j=1; j<12; j++){
+
+    document.getElementById("dep"+j).readOnly = false;
+
+    document.getElementById("dep"+j).style.background = "";
+
+    document.getElementById("dep"+j).style.color = "";
+  }
+
+  MONTHS_TH.forEach((_,i)=>{
+
+    document.getElementById("dep"+i).value = "";
+
+  });
+
+  document.getElementById("resultSection").style.display =
+  "none";
+
+  document.getElementById("disclaimer").style.display =
+  "none";
+}
+
+/* ENTER KEY */
+
+document.addEventListener("keydown",function(e){
+
+  if(e.key === "Enter"){
+
+    calculate();
+
+  }
+
+});
+
+/* SAVE */
+
+function saveData(){
+
+  const data = {
+
+    rate:
+    document.getElementById("rate").value,
+
+    carry:
+    document.getElementById("carryOver").value,
+
+    same:
+    document.getElementById("sameAmountToggle").checked,
+
+    deposits:[]
+
+  };
+
+  MONTHS_TH.forEach((_,i)=>{
+
+    data.deposits.push(
+      document.getElementById("dep"+i).value
+    );
+
+  });
+
+  localStorage.setItem(
+    "coopDividendData",
+    JSON.stringify(data)
+  );
+}
+
+/* LOAD */
+
+function loadData(){
+
+  const raw =
+  localStorage.getItem("coopDividendData");
+
+  if(!raw) return;
+
+  const data = JSON.parse(raw);
+
+  document.getElementById("rate").value =
+  data.rate || "";
+
+  document.getElementById("carryOver").value =
+  data.carry || "";
+
+  document.getElementById("sameAmountToggle").checked =
+  data.same || false;
+
+  MONTHS_TH.forEach((_,i)=>{
+
+    document.getElementById("dep"+i).value =
+    data.deposits?.[i] || "";
+
+  });
+
+  onToggleSame();
+}
+
+loadData();
+
+</script>
+
+</body>
+</html>
