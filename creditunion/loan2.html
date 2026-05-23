@@ -364,25 +364,24 @@ function format(n){
 }
 
 /* FORMAT INPUT WHILE TYPING (รองรับทศนิยมและคอมมา) */
-function formatInput(el){
-  let val = el.value.replace(/,/g, '');
-  
-  if (val === '' || val === '.') return;
-  if (isNaN(val)) {
-    el.value = el.value.replace(/[^\d.]/g, '');
-    return;
-  }
+function formatInput(el) {
+  let raw = el.value.replace(/,/g, '');
 
-  let parts = val.split('.');
-  parts[0] = Number(parts[0]).toLocaleString('th-TH');
-  
-  if (parts[1] !== undefined) {
-    parts[1] = parts[1].substring(0, 2);
-  }
+  // อนุญาตเฉพาะตัวเลขและจุดทศนิยม
+  raw = raw.replace(/[^\d.]/g, '');
 
-  el.value = parts.join('.');
+  // ป้องกันจุดทศนิยมมากกว่า 1 ตัว
+  let parts = raw.split('.');
+  if (parts.length > 2) parts = [parts[0], parts.slice(1).join('')];
+
+  // จำกัดทศนิยม 2 ตำแหน่ง
+  if (parts[1] !== undefined) parts[1] = parts[1].substring(0, 2);
+
+  // ใส่ comma ด้วย regex แทน toLocaleString
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+  el.value = parts.length === 2 ? parts[0] + '.' + parts[1] : parts[0];
 }
-
 // ฟังก์ชันหาจำนวนวันของเดือนที่เลือก โดยอิงปีปัจจุบัน
 function getDaysInMonth(month) {
   if (!month) return 0;
