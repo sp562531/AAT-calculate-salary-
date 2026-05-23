@@ -370,15 +370,21 @@ function formatInput(el) {
   // อนุญาตเฉพาะตัวเลขและจุดทศนิยม
   raw = raw.replace(/[^\d.]/g, '');
 
-  // ป้องกันจุดทศนิยมมากกว่า 1 ตัว
+  // ป้องกันจุดทศนิยมมากกว่า 1 ตัว → ตัดส่วนเกินทิ้ง
+  let dotIndex = raw.indexOf('.');
+  if (dotIndex !== -1) {
+    raw = raw.substring(0, dotIndex + 1) + raw.substring(dotIndex + 1).replace(/\./g, '');
+  }
+
   let parts = raw.split('.');
-  if (parts.length > 2) parts = [parts[0], parts.slice(1).join('')];
 
   // จำกัดทศนิยม 2 ตำแหน่ง
   if (parts[1] !== undefined) parts[1] = parts[1].substring(0, 2);
 
-  // ใส่ comma ด้วย regex แทน toLocaleString
-  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  // ใส่ comma เฉพาะส่วนจำนวนเต็ม
+  if (parts[0] !== '') {
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
 
   el.value = parts.length === 2 ? parts[0] + '.' + parts[1] : parts[0];
 }
